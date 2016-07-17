@@ -39,12 +39,33 @@ public class Game {
     }
 
     /**
+     * strip leading and trailing hyphens
+     * @param st
+     * @return
+     */
+    public String stripHyphens(String st){
+//        System.out.println("IN STRIPHYPHENS: "+st+"  "+st.length());
+//        System.out.println(st.charAt(0));
+        while(st.charAt(0)=='-'){
+            st = st.substring(1);
+        }
+        while(st.charAt(st.length()-1)=='-'){
+            st = st.substring(0,st.length()-1);
+        }
+        return st;
+    }
+
+    /**
      * based on letterPositions, figure out if word is horizontal or vertical
      * get that row and column, then strip '-' from beginning and end
      * @param letterPositions
      * @return
      */
     public String computeWord(ArrayList<LetterPosition> letterPositions){
+        char[][] boardCopy = board.getBoard();
+        for (LetterPosition L:letterPositions){
+            boardCopy[L.position[0]][L.position[1]] = L.letter;
+        }
         String word = "";
         boolean rowsEqual = true;
         boolean colsEqual = true;
@@ -62,19 +83,17 @@ public class Game {
             String st = "";
             int row = letterPositions.get(0).position[0];
             for(int i=0;i<15;i++){
-                st += Character.toString(board.getBoard()[row][i]);
+                st += Character.toString(boardCopy[row][i]);
             }
-            //a.replaceAll("y$|^x", "");  will remove all the y from the end and x from the beggining
-            word = st.replaceAll("-$|^-", "");
+            word = stripHyphens(st);
         }
         else if (colsEqual){
             String st = "";
             int col = letterPositions.get(0).position[1];
             for(int i=0;i<15;i++){
-                st += Character.toString(board.getBoard()[i][col]);
+                st += Character.toString(boardCopy[i][col]);
             }
-            //a.replaceAll("y$|^x", "");  will remove all the y from the end and x from the beggining
-            word = st.replaceAll("-$|^-", "");
+            word = stripHyphens(st);
         }
         else{
             System.out.println("\nERROR in computeWord!!!\n");
@@ -141,6 +160,8 @@ public class Game {
                 }
                 //else
 
+                boolean pass = false;
+
                 //refill player's list of tiles
                 p.addTiles(tilesBag.getTiles(7-p.gettilesLeft()));
 
@@ -170,7 +191,12 @@ public class Game {
                             else{
                                 System.out.print("You do not have enough tiles. Try again: ");
                             }
-                            letterPositions = parseInput(in.nextLine());
+                            line = in.nextLine();
+                            if(line.equals("pass")){
+                                System.out.println("\n* * * "+p.getName()+" passes this turn. * * *\n");
+                                break;
+                            }
+                            letterPositions = parseInput(line);
                             errorcode = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                         }
                     }
@@ -181,6 +207,9 @@ public class Game {
                         //no valid words found
                         //loop until valid word found
                         while (!Validator.isValid(word)) {
+                            if(pass){
+                                break;
+                            }
                             System.out.print("Invalid word: "+word+". Try again.");
                             String line2 = in.nextLine();
                             if (line.equals("pass")) {
@@ -197,7 +226,13 @@ public class Game {
                                         } else {
                                             System.out.println("One or more of the indexes is occupied. Try again: ");
                                         }
-                                        letterPositions2 = parseInput(in.nextLine());
+                                        line = in.nextLine();
+                                        if(line.equals("pass")){
+                                            System.out.println("\n* * * "+p.getName()+" passes this turn. * * *\n");
+                                            pass = true;
+                                            break;
+                                        }
+                                        letterPositions2 = parseInput(line);
                                         errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
                                     }
                                 }
@@ -208,15 +243,17 @@ public class Game {
                         }
                     }
                     else{
-                        //SCORE PERPENDICULAR WORDS TOO//TODO
-                        ArrayList<LetterPosition> tiles = parseInput(line);
-                        p.addScore(computeScore(tiles));
-                        addTiles(tiles);
-                        for(LetterPosition c:tiles){
-                            p.removeTile(c.letter);
+                        if(!pass) {
+                            //SCORE PERPENDICULAR WORDS TOO//TODO
+                            ArrayList<LetterPosition> tiles = parseInput(line);
+                            p.addScore(computeScore(tiles));
+                            addTiles(tiles);
+                            for (LetterPosition c : tiles) {
+                                p.removeTile(c.letter);
+                            }
+                            System.out.println("\n" + p.getName() + " scores " + computeScore(tiles) + " points.");
+                            System.out.println(p.getName() + "'s current total score is " + p.getScore() + " points.");
                         }
-                        System.out.println("\n"+p.getName()+" scores "+computeScore(tiles)+" points.");
-                        System.out.println(p.getName()+"'s current total score is "+p.getScore()+" points.");
                     }
                 }
             }

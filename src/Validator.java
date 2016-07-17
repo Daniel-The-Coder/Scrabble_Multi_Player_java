@@ -57,7 +57,7 @@ public class Validator {
             }
         }
         //either rows are equal or cols are equal, not both
-        if( ! ( ((!rowsEqual) && colsEqual) || (rowsEqual && (!colsEqual)) ) ){
+        if( ! ( ((!rowsEqual) && colsEqual) || (rowsEqual && (!colsEqual)) || tiles.size()==1 ) ){
             return 2;
         }
 
@@ -100,3 +100,13 @@ public class Validator {
         return true;
     }
 }
+
+
+/*
+ERRORS
+
+1. Make sure word touches the current cluster unless its the first word.
+2. Change compute word to get word from inside, to prevent reading characters of other words on same row or col. refer to image on desktop.
+3. Score perpendicular words.
+
+ */

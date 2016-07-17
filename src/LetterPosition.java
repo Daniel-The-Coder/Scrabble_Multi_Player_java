@@ -9,4 +9,9 @@ public class LetterPosition {
         this.letter = letter;
         this.position = position;
     }
+
+    @Override
+    public String toString(){
+        return letter+": "+position[0]+","+position[1];
+    }
 }
