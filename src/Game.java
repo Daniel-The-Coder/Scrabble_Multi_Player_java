@@ -7,6 +7,8 @@ import java.util.*;
 public class Game {
     public boolean gameOver;
 
+    public static boolean firstWord = true;
+
     public ArrayList<Player> players;
     public TilesBag tilesBag;
     public Board board;
@@ -202,8 +204,11 @@ public class Game {
                             } else if(errorcode == 3) {
                                 System.out.print("One or more of the indexes is occupied. Try again: ");
                             }
-                            else{
+                            else if(errorcode == 4){
                                 System.out.print("You do not have enough tiles. Try again: ");
+                            }
+                            else{
+                                System.out.print("Your word must join the existing cluster Try again: ");
                             }
                             line = in.nextLine();
                             if(line.equals("pass")){
@@ -244,8 +249,11 @@ public class Game {
                                         } else if(errorcode == 3) {
                                             System.out.print("One or more of the indexes is occupied. Try again: ");
                                         }
-                                        else{
+                                        else if(errorcode == 4){
                                             System.out.print("You do not have enough tiles. Try again: ");
+                                        }
+                                        else{
+                                            System.out.print("Your word must join the existing cluster Try again: ");
                                         }
                                         line = in.nextLine();
                                         if(line.equals("pass")){
@@ -265,6 +273,7 @@ public class Game {
                     }
 
                     if(!pass) {
+                        firstWord = false;
                         //SCORE PERPENDICULAR WORDS TOO//TODO
                         ArrayList<LetterPosition> tiles = parseInput(line);
                         p.addScore(computeScore(tiles));

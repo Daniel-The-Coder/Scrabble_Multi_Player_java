@@ -82,6 +82,22 @@ public class Validator {
             }
         }
 
+        //check whether current word joins existing cluster
+        //if it's the first word, no error
+        boolean error5 = true;
+        for(LetterPosition L:letterPositions){
+            for(int i = L.position[0]-1;i<L.position[0]+2;i++){
+                for(int j = L.position[1]-1;j<L.position[1]+2;j++){
+                    if( ! (board[i][j] == '-') ){
+                        error5 = false;
+                    }
+                }
+            }
+        }
+        if(error5 && !Game.firstWord){
+            return 5;
+        }
+
         //valid - code 0
         return 0;
     }
@@ -105,8 +121,7 @@ public class Validator {
 /*
 ERRORS
 
-1. Make sure word touches the current cluster unless its the first word.
-2. Score perpendicular words.
+1. Score perpendicular words.
 
 
  */
