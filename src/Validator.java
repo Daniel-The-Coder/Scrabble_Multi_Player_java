@@ -18,7 +18,7 @@ public class Validator {
         Scanner in = new Scanner(new File("resources/words"));
         words = new ArrayList<>();
         while(in.hasNext()){
-            words.add(in.next());
+            words.add(in.next().toUpperCase());
         }
     }
 

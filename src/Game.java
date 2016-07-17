@@ -45,7 +45,6 @@ public class Game {
      * @return
      */
     public String computeWord(ArrayList<LetterPosition> letterPositions){
-        System.out.println(letterPositions);
         String word = "";
         boolean rowsEqual = true;
         boolean colsEqual = true;
@@ -86,6 +85,7 @@ public class Game {
     public void initializeGame() throws FileNotFoundException{
         Validator.init();
         Scanner in = new Scanner(System.in);
+        System.out.println("Welcome to Daniel's Scrabble!\n");
         System.out.print("How many players? (2-4) ");
         int numOfPlayers = in.nextInt();
         while(numOfPlayers < 2 || numOfPlayers > 4){
@@ -181,7 +181,7 @@ public class Game {
                         //no valid words found
                         //loop until valid word found
                         while (!Validator.isValid(word)) {
-                            System.out.print("Try again.");
+                            System.out.print("Invalid word: "+word+". Try again.");
                             String line2 = in.nextLine();
                             if (line.equals("pass")) {
                                 System.out.println("\n* * * " + p.getName() + " passes this turn. * * *\n");
