@@ -20,7 +20,7 @@ public class Game {
         this.board = new Board();
     }
 
-    public void initializeGame(){
+    public void initializeGame() throws FileNotFoundException{
         Validator.init();
         Scanner in = new Scanner(System.in);
         System.out.print("How many players? (2-4) ");
@@ -63,15 +63,18 @@ public class Game {
                     System.out.println("\n* * * "+p.getName()+" passes this turn. * * *\n");
                 }
                 else {
-                    HashMap<String, int[]> letterPositions = Validator.parseInput(line);
+                    HashMap<Character, int[]> letterPositions = Validator.parseInput(line);
                     int errorcode = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                     if (errorcode != 0) {
                         //loop until valid indexes given
                         while (errorcode != 0) {
                             if (errorcode == 1) {
                                 System.out.print("Invalid indexes. Try again: ");
-                            } else {
+                            } else if(errorcode == 2) {
                                 System.out.println("One or more of the indexes is occupied. Try again: ");
+                            }
+                            else{
+                                System.out.println("You do not have enough tiles. Try again: ");
                             }
                             letterPositions = Validator.parseInput(in.nextLine());
                             errorcode = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
@@ -90,7 +93,7 @@ public class Game {
                                 System.out.println("\n* * * " + p.getName() + " passes this turn. * * *\n");
                                 break;
                             } else {
-                                HashMap<String, int[]> letterPositions2 = Validator.parseInput(line2);
+                                HashMap<Character, int[]> letterPositions2 = Validator.parseInput(line2);
                                 int errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
                                 if (errorcode2 != 0) {
                                     //loop until valid indexes given
@@ -106,7 +109,7 @@ public class Game {
                                 }
                                 //now valid input has been obtained
                                 //use indexes to figure out the word and check if it's valid
-                                String word2 = ""; //TODO use letterpositions2 ane board to figure out word
+                                word = ""; //TODO use letterpositions2 ane board to figure out word
                             }
                         }
                     }
