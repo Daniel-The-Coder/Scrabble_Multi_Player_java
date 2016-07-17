@@ -104,14 +104,20 @@ public class Validator {
 
 
     public static boolean isValid(String word){
+        //if the word is not in the words file
         if (!words.contains(word)) {
             return false;
         }
+        //if the word contains '-' (empty cell)
         for(int i=0;i<word.length();i++){
             char c = word.charAt(i);
             if(c == '-'){
                 return false;
             }
+        }
+        //if the length of the word is 1
+        if(word.length()==1){
+            return false;
         }
         return true;
     }
@@ -119,9 +125,10 @@ public class Validator {
 
 
 /*
-ERRORS
+TODO
 
 1. Score perpendicular words.
+2. Declare winner.
 
 
  */

@@ -229,7 +229,7 @@ public class Game {
                             if(pass){
                                 break;
                             }
-                            System.out.print("Invalid word: "+word+". Try again.");
+                            System.out.print("Invalid word or length is 1: "+word+". Try again.");
                             line = in.nextLine();
                             if (line.equals("pass")) {
                                 System.out.println("\n* * * " + p.getName() + " passes this turn. * * *\n");
