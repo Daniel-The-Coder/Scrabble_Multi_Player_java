@@ -297,5 +297,16 @@ public class Game {
         game.play();
         System.out.println("\n* * * GAME OVER * * *");
         //print winner
+        Player winner = game.players.get(0);
+        System.out.println("\nScores:");
+        for(Player p:game.players){
+            //print all scores
+            System.out.println(p.getName()+": "+p.getScore());
+            if(p.getScore() > winner.getScore()){
+                winner = p;
+            }
+        }
+        System.out.println("\nWinner: "+winner.getName());
+
     }
 }
