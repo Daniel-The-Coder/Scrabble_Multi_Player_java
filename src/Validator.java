@@ -1,3 +1,4 @@
+import javax.jws.soap.SOAPBinding;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -33,12 +34,11 @@ public class Validator {
      * @param tiles
      * @return
      */
-    public static int validate(HashMap<Character, int[]> letterPositions, char[][] board, ArrayList<Character> tiles){
-        ArrayList<Character> keys= new ArrayList<>(letterPositions.keySet());
+    public static int validate(ArrayList<LetterPosition> letterPositions, char[][] board, ArrayList<Character> tiles){
 
         //make sure that all indexes are valid - error code 1
-        for(char c:keys){
-            if(letterPositions.get(c)[0]<0 || letterPositions.get(c)[0]>14 || letterPositions.get(c)[1]<0 || letterPositions.get(c)[1]>14){
+        for(LetterPosition L:letterPositions){
+            if(L.position[0]<0 || L.position[0]>14 || L.position[1]<0 || L.position[1]>14){
                 return 1;
             }
         }
@@ -46,26 +46,26 @@ public class Validator {
         //make sure that all column values are equal or all row values are equal - error code 2
         boolean rowsEqual = true;
         boolean colsEqual = true;
-        int row1 = letterPositions.get(keys.get(0))[0];
-        int col1 = letterPositions.get(keys.get(0))[1];
-        for(char c:keys){
-            if(!(letterPositions.get(c)[0]==row1)){
+        int row1 = letterPositions.get(0).position[0];
+        int col1 = letterPositions.get(0).position[1];
+        for(LetterPosition L:letterPositions){
+            if(!(L.position[0]==row1)){
                 rowsEqual = false;
             }
-            if(!(letterPositions.get(c)[1]==col1)){
+            if(!(L.position[1]==col1)){
                 colsEqual = false;
             }
         }
         //either rows are equal or cols are equal, not both
-        if( ! ( (!rowsEqual && colsEqual) || (rowsEqual && !colsEqual) ) ){
-            return 1;
+        if( ! ( ((!rowsEqual) && colsEqual) || (rowsEqual && (!colsEqual)) ) ){
+            return 2;
         }
 
         //make sure the indexes in the board are unoccupied - error code 3
-        for (char c:keys){
-            int[] pos = letterPositions.get(c);
-            if(board[pos[0]][pos[1]] == '-'){
-                return 2;
+        for (LetterPosition L:letterPositions){
+            int[] pos = L.position;
+            if(! (board[pos[0]][pos[1]] == '-') ){
+                return 3;
             }
         }
 
@@ -73,12 +73,12 @@ public class Validator {
         //keep removing letters the player chose from the list of his tiles.
         //if player's tiles list does not contain a letter, the selection is invalid
         ArrayList<Character> tilesCopy = new ArrayList<>(tiles);
-        for(char c:keys){
-            if(!tilesCopy.contains(c)){
-                return 3;
+        for(LetterPosition L:letterPositions){
+            if(!tilesCopy.contains(L.letter)){
+                return 4;
             }
             else{
-                tilesCopy.remove(c);
+                tilesCopy.remove((Character)L.letter);
             }
         }
 

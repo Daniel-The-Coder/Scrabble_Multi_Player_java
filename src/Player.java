@@ -40,6 +40,6 @@ public class Player {
     }
 
     public void removeTile(char c){
-        tiles.remove(c);
+        tiles.remove((Character)c);
     }
 }

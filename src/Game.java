@@ -18,10 +18,18 @@ public class Game {
         this.board = new Board();
     }
 
-    public int computeScore(ArrayList<Character> tiles){
+    public void addTiles(ArrayList<LetterPosition> tiles){
+        for(LetterPosition L:tiles){
+            int row = L.position[0];
+            int col = L.position[1];
+            this.board.add(L.letter, row, col);
+        }
+    }
+
+    public int computeScore(ArrayList<LetterPosition> tiles){
         int score = 0;
-        for(char c:tiles){
-            score += tilesBag.getLetterScore(c);
+        for(LetterPosition L:tiles){
+            score += tilesBag.getLetterScore(L.letter);
         }
         if(tiles.size() == 7){
             //BONUS
@@ -36,24 +44,24 @@ public class Game {
      * @param letterPositions
      * @return
      */
-    public String computeWord(HashMap<Character, int[]> letterPositions){
+    public String computeWord(ArrayList<LetterPosition> letterPositions){
+        System.out.println(letterPositions);
         String word = "";
         boolean rowsEqual = true;
         boolean colsEqual = true;
-        ArrayList<Character> keys = new ArrayList<>(letterPositions.keySet());
-        int row1 = letterPositions.get(keys.get(0))[0];
-        int col1 = letterPositions.get(keys.get(0))[1];
-        for(char c:keys){
-            if(!(letterPositions.get(c)[0]==row1)){
+        int row1 = letterPositions.get(0).position[0];
+        int col1 = letterPositions.get(0).position[1];
+        for(LetterPosition L:letterPositions){
+            if(!(L.position[0]==row1)){
                 rowsEqual = false;
             }
-            if(!(letterPositions.get(c)[1]==col1)){
+            if(!(L.position[1]==col1)){
                 colsEqual = false;
             }
         }
         if(rowsEqual){
             String st = "";
-            int row = letterPositions.get(0)[0];
+            int row = letterPositions.get(0).position[0];
             for(int i=0;i<15;i++){
                 st += Character.toString(board.getBoard()[row][i]);
             }
@@ -62,7 +70,7 @@ public class Game {
         }
         else if (colsEqual){
             String st = "";
-            int col = letterPositions.get(0)[1];
+            int col = letterPositions.get(0).position[1];
             for(int i=0;i<15;i++){
                 st += Character.toString(board.getBoard()[i][col]);
             }
@@ -100,7 +108,7 @@ public class Game {
      * @return
      */
     private static int letterToNum(char c){
-        return (int)Character.toUpperCase(c) - 97; //A is 97; output should be 0
+        return (int)Character.toUpperCase(c) - 64; //A is 65; output should be 1
     }
 
     /**
@@ -109,18 +117,18 @@ public class Game {
      * @param line
      * @return
      */
-    public static HashMap<Character, int[]> parseInput(String line){
-        HashMap<Character, int[]> map = new HashMap();
+    public static ArrayList<LetterPosition> parseInput(String line){
+        ArrayList<LetterPosition> ar = new ArrayList<>();
         List<String> lineList = Arrays.asList(line.split(" "));
         for(int i=0;i<lineList.size();i+=2){
             char letter = lineList.get(i).charAt(0);
             String position = lineList.get(i+1);
-            int row = Integer.parseInt(position.substring(0, position.length()-1));
-            int col = letterToNum(position.charAt(position.length()-1));
+            int row = Integer.parseInt(position.substring(0, position.length()-1)) - 1;
+            int col = letterToNum(position.charAt(position.length()-1)) - 1;
             int[] pos = {row,col};
-            map.put(letter, pos);
+            ar.add(new LetterPosition(letter, pos));
         }
-        return map;
+        return ar;
     }
 
     public void play(){
@@ -146,7 +154,7 @@ public class Game {
                     System.out.println("\n* * * "+p.getName()+" passes this turn. * * *\n");
                 }
                 else {
-                    HashMap<Character, int[]> letterPositions = parseInput(line);
+                    ArrayList<LetterPosition> letterPositions = parseInput(line);
                     int errorcode = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                     if (errorcode != 0) {
                         //loop until valid indexes given
@@ -179,7 +187,7 @@ public class Game {
                                 System.out.println("\n* * * " + p.getName() + " passes this turn. * * *\n");
                                 break;
                             } else {
-                                HashMap<Character, int[]> letterPositions2 = parseInput(line2);
+                                ArrayList<LetterPosition> letterPositions2 = parseInput(line2);
                                 int errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
                                 if (errorcode2 != 0) {
                                     //loop until valid indexes given
@@ -200,12 +208,15 @@ public class Game {
                         }
                     }
                     else{
-                        //add it to the board and remove from player's tiles and score//TODO
-                        ArrayList<Character> tiles = new ArrayList<>(parseInput(line).keySet());
+                        //SCORE PERPENDICULAR WORDS TOO//TODO
+                        ArrayList<LetterPosition> tiles = parseInput(line);
                         p.addScore(computeScore(tiles));
-                        for(char c:tiles){
-                            p.removeTile(c);
+                        addTiles(tiles);
+                        for(LetterPosition c:tiles){
+                            p.removeTile(c.letter);
                         }
+                        System.out.println("\n"+p.getName()+" scores "+computeScore(tiles)+" points.");
+                        System.out.println(p.getName()+"'s current total score is "+p.getScore()+" points.");
                     }
                 }
             }
