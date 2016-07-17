@@ -43,7 +43,7 @@ public class Validator {
             }
         }
 
-        //make sure that all column values are equal or all row values are equal - error code 1
+        //make sure that all column values are equal or all row values are equal - error code 2
         boolean rowsEqual = true;
         boolean colsEqual = true;
         int row1 = letterPositions.get(keys.get(0))[0];
@@ -61,7 +61,7 @@ public class Validator {
             return 1;
         }
 
-        //make sure the indexes in the board are unoccupied - error code 2
+        //make sure the indexes in the board are unoccupied - error code 3
         for (char c:keys){
             int[] pos = letterPositions.get(c);
             if(board[pos[0]][pos[1]] == '-'){
@@ -69,7 +69,7 @@ public class Validator {
             }
         }
 
-        //make sure the player has enough tiles - error code 3
+        //make sure the player has enough tiles - error code 4
         //keep removing letters the player chose from the list of his tiles.
         //if player's tiles list does not contain a letter, the selection is invalid
         ArrayList<Character> tilesCopy = new ArrayList<>(tiles);
@@ -86,38 +86,17 @@ public class Validator {
         return 0;
     }
 
-    /**
-     * Convert String to Hashmap of letters and indexes
-     * For example: X 2F Y 2G Z 2H -> { X:[2,6] ; Y:[2,7] ; Z:[2,8] }
-     * @param line
-     * @return
-     */
-    public static HashMap<Character, int[]> parseInput(String line){
-        HashMap<Character, int[]> map = new HashMap();
-        List<String> lineList = Arrays.asList(line.split(" "));
-        for(int i=0;i<lineList.size();i+=2){
-            char letter = lineList.get(i).charAt(0);
-            String position = lineList.get(i+1);
-            int row = Integer.parseInt(position.substring(0, position.length()-1));
-            int col = letterToNum(position.charAt(position.length()-1));
-            int[] pos = {row,col};
-            map.put(letter, pos);
-        }
-        return map;
-    }
-
-    /**
-     * takes in a character and returns a number corresponding to it
-     * @return
-     */
-    private static int letterToNum(char c){
-        return (int)Character.toUpperCase(c) - 97; //A is 97; output should be 0
-    }
 
     public static boolean isValid(String word){
-        if (words.contains(word)) {
-            return true;
+        if (!words.contains(word)) {
+            return false;
         }
-        return false; //else
+        for(int i=0;i<word.length();i++){
+            char c = word.charAt(i);
+            if(c == '-'){
+                return false;
+            }
+        }
+        return true;
     }
 }

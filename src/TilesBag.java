@@ -51,6 +51,10 @@ public class TilesBag {
         }
     }
 
+    public int getLetterScore(char c){
+        return letterScores.get(c);
+    }
+
     public ArrayList<Character> getTiles(int num){
         ArrayList<Character> tilesToReturn = new ArrayList<>();
         if(num > tiles.size()){

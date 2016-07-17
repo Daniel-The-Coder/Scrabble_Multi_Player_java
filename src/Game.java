@@ -1,7 +1,5 @@
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by Lord Daniel on 7/16/2016.
@@ -18,6 +16,63 @@ public class Game {
         this.players = new ArrayList<>();
         this.tilesBag = new TilesBag();
         this.board = new Board();
+    }
+
+    public int computeScore(ArrayList<Character> tiles){
+        int score = 0;
+        for(char c:tiles){
+            score += tilesBag.getLetterScore(c);
+        }
+        if(tiles.size() == 7){
+            //BONUS
+            score += 50;
+        }
+        return score;
+    }
+
+    /**
+     * based on letterPositions, figure out if word is horizontal or vertical
+     * get that row and column, then strip '-' from beginning and end
+     * @param letterPositions
+     * @return
+     */
+    public String computeWord(HashMap<Character, int[]> letterPositions){
+        String word = "";
+        boolean rowsEqual = true;
+        boolean colsEqual = true;
+        ArrayList<Character> keys = new ArrayList<>(letterPositions.keySet());
+        int row1 = letterPositions.get(keys.get(0))[0];
+        int col1 = letterPositions.get(keys.get(0))[1];
+        for(char c:keys){
+            if(!(letterPositions.get(c)[0]==row1)){
+                rowsEqual = false;
+            }
+            if(!(letterPositions.get(c)[1]==col1)){
+                colsEqual = false;
+            }
+        }
+        if(rowsEqual){
+            String st = "";
+            int row = letterPositions.get(0)[0];
+            for(int i=0;i<15;i++){
+                st += Character.toString(board.getBoard()[row][i]);
+            }
+            //a.replaceAll("y$|^x", "");  will remove all the y from the end and x from the beggining
+            word = st.replaceAll("-$|^-", "");
+        }
+        else if (colsEqual){
+            String st = "";
+            int col = letterPositions.get(0)[1];
+            for(int i=0;i<15;i++){
+                st += Character.toString(board.getBoard()[i][col]);
+            }
+            //a.replaceAll("y$|^x", "");  will remove all the y from the end and x from the beggining
+            word = st.replaceAll("-$|^-", "");
+        }
+        else{
+            System.out.println("\nERROR in computeWord!!!\n");
+        }
+        return word;
     }
 
     public void initializeGame() throws FileNotFoundException{
@@ -38,6 +93,34 @@ public class Game {
             }
             this.players.add(new Player(playerName));
         }
+    }
+
+    /**
+     * takes in a character and returns a number corresponding to it
+     * @return
+     */
+    private static int letterToNum(char c){
+        return (int)Character.toUpperCase(c) - 97; //A is 97; output should be 0
+    }
+
+    /**
+     * Convert String to Hashmap of letters and indexes
+     * For example: X 2F Y 2G Z 2H -> { X:[2,6] ; Y:[2,7] ; Z:[2,8] }
+     * @param line
+     * @return
+     */
+    public static HashMap<Character, int[]> parseInput(String line){
+        HashMap<Character, int[]> map = new HashMap();
+        List<String> lineList = Arrays.asList(line.split(" "));
+        for(int i=0;i<lineList.size();i+=2){
+            char letter = lineList.get(i).charAt(0);
+            String position = lineList.get(i+1);
+            int row = Integer.parseInt(position.substring(0, position.length()-1));
+            int col = letterToNum(position.charAt(position.length()-1));
+            int[] pos = {row,col};
+            map.put(letter, pos);
+        }
+        return map;
     }
 
     public void play(){
@@ -63,26 +146,29 @@ public class Game {
                     System.out.println("\n* * * "+p.getName()+" passes this turn. * * *\n");
                 }
                 else {
-                    HashMap<Character, int[]> letterPositions = Validator.parseInput(line);
+                    HashMap<Character, int[]> letterPositions = parseInput(line);
                     int errorcode = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                     if (errorcode != 0) {
                         //loop until valid indexes given
                         while (errorcode != 0) {
                             if (errorcode == 1) {
                                 System.out.print("Invalid indexes. Try again: ");
-                            } else if(errorcode == 2) {
-                                System.out.println("One or more of the indexes is occupied. Try again: ");
+                            } else if (errorcode == 2) {
+                                System.out.print("You must place your tiles on only one row or one column. Try again: ");
+
+                            } else if(errorcode == 3) {
+                                System.out.print("One or more of the indexes is occupied. Try again: ");
                             }
                             else{
-                                System.out.println("You do not have enough tiles. Try again: ");
+                                System.out.print("You do not have enough tiles. Try again: ");
                             }
-                            letterPositions = Validator.parseInput(in.nextLine());
+                            letterPositions = parseInput(in.nextLine());
                             errorcode = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                         }
                     }
                     //now valid input has been obtained
                     //use indexes to figure out the word and check if it's valid
-                    String word = ""; //TODO use letterpositions ane board to figure out word
+                    String word = computeWord(letterPositions);
                     if(!Validator.isValid(word)) {
                         //no valid words found
                         //loop until valid word found
@@ -93,7 +179,7 @@ public class Game {
                                 System.out.println("\n* * * " + p.getName() + " passes this turn. * * *\n");
                                 break;
                             } else {
-                                HashMap<Character, int[]> letterPositions2 = Validator.parseInput(line2);
+                                HashMap<Character, int[]> letterPositions2 = parseInput(line2);
                                 int errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
                                 if (errorcode2 != 0) {
                                     //loop until valid indexes given
@@ -103,18 +189,23 @@ public class Game {
                                         } else {
                                             System.out.println("One or more of the indexes is occupied. Try again: ");
                                         }
-                                        letterPositions2 = Validator.parseInput(in.nextLine());
+                                        letterPositions2 = parseInput(in.nextLine());
                                         errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
                                     }
                                 }
                                 //now valid input has been obtained
                                 //use indexes to figure out the word and check if it's valid
-                                word = ""; //TODO use letterpositions2 ane board to figure out word
+                                word = computeWord(letterPositions);
                             }
                         }
                     }
                     else{
-                        //add it to the board and remove from player's tiles //TODO
+                        //add it to the board and remove from player's tiles and score//TODO
+                        ArrayList<Character> tiles = new ArrayList<>(parseInput(line).keySet());
+                        p.addScore(computeScore(tiles));
+                        for(char c:tiles){
+                            p.removeTile(c);
+                        }
                     }
                 }
             }

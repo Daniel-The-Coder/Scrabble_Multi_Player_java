@@ -38,4 +38,8 @@ public class Player {
     public ArrayList<Character> getTiles(){
         return this.tiles;
     }
+
+    public void removeTile(char c){
+        tiles.remove(c);
+    }
 }
