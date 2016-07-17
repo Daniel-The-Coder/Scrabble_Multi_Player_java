@@ -26,6 +26,16 @@ public class Game {
         }
     }
 
+    public char[][] copyBoard(char[][] board1){
+        char[][] board2 = new char[15][15];
+        for(int i=0;i<15;i++){
+            for(int j=0;j<15;j++){
+                board2[i][j] = new Character(board1[i][j]);
+            }
+        }
+        return board2;
+    }
+
     public int computeScore(ArrayList<LetterPosition> tiles){
         int score = 0;
         for(LetterPosition L:tiles){
@@ -43,16 +53,19 @@ public class Game {
      * @param st
      * @return
      */
-    public String stripHyphens(String st){
-//        System.out.println("IN STRIPHYPHENS: "+st+"  "+st.length());
-//        System.out.println(st.charAt(0));
-        while(st.charAt(0)=='-'){
-            st = st.substring(1);
+    public String stripHyphens(String st, int index){
+        String str = "";
+        int i1 = index;
+        int i2 = index-1;
+        while(!(st.charAt(i1)=='-')){
+            str += st.substring(i1,i1+1); // add to the end
+            i1+=1;
         }
-        while(st.charAt(st.length()-1)=='-'){
-            st = st.substring(0,st.length()-1);
+        while(!(st.charAt(i2)=='-')){
+            str = st.substring(i2,i2+1) + str; // add to the beginning
+            i2-=1;
         }
-        return st;
+        return str;
     }
 
     /**
@@ -62,7 +75,7 @@ public class Game {
      * @return
      */
     public String computeWord(ArrayList<LetterPosition> letterPositions){
-        char[][] boardCopy = board.getBoard();
+        char[][] boardCopy = copyBoard(board.getBoard());
         for (LetterPosition L:letterPositions){
             boardCopy[L.position[0]][L.position[1]] = L.letter;
         }
@@ -85,7 +98,7 @@ public class Game {
             for(int i=0;i<15;i++){
                 st += Character.toString(boardCopy[row][i]);
             }
-            word = stripHyphens(st);
+            word = stripHyphens(st, letterPositions.get(0).position[1]);
         }
         else if (colsEqual){
             String st = "";
@@ -93,7 +106,7 @@ public class Game {
             for(int i=0;i<15;i++){
                 st += Character.toString(boardCopy[i][col]);
             }
-            word = stripHyphens(st);
+            word = stripHyphens(st, letterPositions.get(0).position[0]);
         }
         else{
             System.out.println("\nERROR in computeWord!!!\n");
@@ -171,7 +184,7 @@ public class Game {
                 System.out.println("Your tiles: "+p.getTiles());
                 System.out.print("Enter letters and locations OR \"pass\": ");
                 String line = in.nextLine();
-                if(line.equals("pass")){
+                if(line.toUpperCase().equals("PASS")){
                     System.out.println("\n* * * "+p.getName()+" passes this turn. * * *\n");
                 }
                 else {
@@ -180,6 +193,7 @@ public class Game {
                     if (errorcode != 0) {
                         //loop until valid indexes given
                         while (errorcode != 0) {
+                            pass = false;
                             if (errorcode == 1) {
                                 System.out.print("Invalid indexes. Try again: ");
                             } else if (errorcode == 2) {
@@ -211,20 +225,27 @@ public class Game {
                                 break;
                             }
                             System.out.print("Invalid word: "+word+". Try again.");
-                            String line2 = in.nextLine();
+                            line = in.nextLine();
                             if (line.equals("pass")) {
                                 System.out.println("\n* * * " + p.getName() + " passes this turn. * * *\n");
                                 break;
                             } else {
-                                ArrayList<LetterPosition> letterPositions2 = parseInput(line2);
-                                int errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
+                                pass = false;
+                                letterPositions = parseInput(line);
+                                int errorcode2 = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                                 if (errorcode2 != 0) {
                                     //loop until valid indexes given
                                     while (errorcode2 != 0) {
-                                        if (errorcode2 == 1) {
+                                        if (errorcode == 1) {
                                             System.out.print("Invalid indexes. Try again: ");
-                                        } else {
-                                            System.out.println("One or more of the indexes is occupied. Try again: ");
+                                        } else if (errorcode == 2) {
+                                            System.out.print("You must place your tiles on only one row or one column. Try again: ");
+
+                                        } else if(errorcode == 3) {
+                                            System.out.print("One or more of the indexes is occupied. Try again: ");
+                                        }
+                                        else{
+                                            System.out.print("You do not have enough tiles. Try again: ");
                                         }
                                         line = in.nextLine();
                                         if(line.equals("pass")){
@@ -232,8 +253,8 @@ public class Game {
                                             pass = true;
                                             break;
                                         }
-                                        letterPositions2 = parseInput(line);
-                                        errorcode2 = Validator.validate(letterPositions2, this.board.getBoard(), p.getTiles());
+                                        letterPositions = parseInput(line);
+                                        errorcode2 = Validator.validate(letterPositions, this.board.getBoard(), p.getTiles());
                                     }
                                 }
                                 //now valid input has been obtained
@@ -242,18 +263,19 @@ public class Game {
                             }
                         }
                     }
-                    else{
-                        if(!pass) {
-                            //SCORE PERPENDICULAR WORDS TOO//TODO
-                            ArrayList<LetterPosition> tiles = parseInput(line);
-                            p.addScore(computeScore(tiles));
-                            addTiles(tiles);
-                            for (LetterPosition c : tiles) {
-                                p.removeTile(c.letter);
-                            }
-                            System.out.println("\n" + p.getName() + " scores " + computeScore(tiles) + " points.");
-                            System.out.println(p.getName() + "'s current total score is " + p.getScore() + " points.");
+
+                    if(!pass) {
+                        //SCORE PERPENDICULAR WORDS TOO//TODO
+                        ArrayList<LetterPosition> tiles = parseInput(line);
+                        p.addScore(computeScore(tiles));
+                        addTiles(tiles);
+                        for (LetterPosition c : tiles) {
+                            p.removeTile(c.letter);
                         }
+                        System.out.println("\nWord: "+word);
+                        System.out.println(p.getName() + " scores " + computeScore(tiles) + " points.");
+                        System.out.println(p.getName() + "'s current total score is " + p.getScore() + " points.");
+
                     }
                 }
             }
