@@ -81,39 +81,68 @@ public class Game {
         for (LetterPosition L:letterPositions){
             boardCopy[L.position[0]][L.position[1]] = L.letter;
         }
-        String word = "";
-        boolean rowsEqual = true;
-        boolean colsEqual = true;
-        int row1 = letterPositions.get(0).position[0];
-        int col1 = letterPositions.get(0).position[1];
-        for(LetterPosition L:letterPositions){
-            if(!(L.position[0]==row1)){
-                rowsEqual = false;
-            }
-            if(!(L.position[1]==col1)){
-                colsEqual = false;
-            }
-        }
-        if(rowsEqual){
-            String st = "";
+        if(letterPositions.size()==1){
+            //here, check words both horizontally and vertically
+            int row1 = letterPositions.get(0).position[0];
+            int col1 = letterPositions.get(0).position[1];
+
+            String st1 = "";
             int row = letterPositions.get(0).position[0];
-            for(int i=0;i<15;i++){
-                st += Character.toString(boardCopy[row][i]);
+            for (int i = 0; i < 15; i++) {
+                st1 += Character.toString(boardCopy[row][i]);
             }
-            word = stripHyphens(st, letterPositions.get(0).position[1]);
-        }
-        else if (colsEqual){
-            String st = "";
+            String word1 = stripHyphens(st1, letterPositions.get(0).position[1]);
+
+            String st2 = "";
             int col = letterPositions.get(0).position[1];
-            for(int i=0;i<15;i++){
-                st += Character.toString(boardCopy[i][col]);
+            for (int i = 0; i < 15; i++) {
+                st2 += Character.toString(boardCopy[i][col]);
             }
-            word = stripHyphens(st, letterPositions.get(0).position[0]);
+            String word2 = stripHyphens(st2, letterPositions.get(0).position[0]);
+
+            if(Validator.isValid(word1)){
+                return word1;
+            }
+            else if(Validator.isValid(word2)){
+                return word2;
+            }
+            else{
+                return word1+" or "+word2;
+            }
         }
-        else{
-            System.out.println("\nERROR in computeWord!!!\n");
+        else {
+            String word = "";
+            boolean rowsEqual = true;
+            boolean colsEqual = true;
+            int row1 = letterPositions.get(0).position[0];
+            int col1 = letterPositions.get(0).position[1];
+            for (LetterPosition L : letterPositions) {
+                if (!(L.position[0] == row1)) {
+                    rowsEqual = false;
+                }
+                if (!(L.position[1] == col1)) {
+                    colsEqual = false;
+                }
+            }
+            if (rowsEqual) {
+                String st = "";
+                int row = letterPositions.get(0).position[0];
+                for (int i = 0; i < 15; i++) {
+                    st += Character.toString(boardCopy[row][i]);
+                }
+                word = stripHyphens(st, letterPositions.get(0).position[1]);
+            } else if (colsEqual) {
+                String st = "";
+                int col = letterPositions.get(0).position[1];
+                for (int i = 0; i < 15; i++) {
+                    st += Character.toString(boardCopy[i][col]);
+                }
+                word = stripHyphens(st, letterPositions.get(0).position[0]);
+            } else {
+                System.out.println("\nERROR in computeWord!!!\n");
+            }
+            return word;
         }
-        return word;
     }
 
     public void initializeGame() throws FileNotFoundException{

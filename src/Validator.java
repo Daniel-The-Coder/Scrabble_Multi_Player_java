@@ -57,7 +57,7 @@ public class Validator {
             }
         }
         //either rows are equal or cols are equal, not both
-        if( ! ( ((!rowsEqual) && colsEqual) || (rowsEqual && (!colsEqual)) || tiles.size()==1 ) ){
+        if( ! ( ((!rowsEqual) && colsEqual) || (rowsEqual && (!colsEqual)) || letterPositions.size()==1 ) ){
             return 2;
         }
 
